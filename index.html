@@ -49,13 +49,6 @@
             margin: 10px 0;
             color: #555;
         }
-        .image-preview {
-            margin-bottom: 20px;
-        }
-        .image-preview img {
-            max-width: 100%;
-            height: auto;
-        }
         .btn {
             padding: 15px 30px;
             font-size: 1em;
@@ -65,49 +58,63 @@
             color: #fff;
             margin: 5px;
         }
-        .btn-upload {
-            background-color: #007BFF;
-        }
         .btn-process {
             background-color: #28A745;
         }
-        .btn-reset {
-            background-color: #DC3545;
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: grey;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>토리매트 로고 편집기</h1>
-        <div class="upload-box">
+        <div class="upload-box" id="upload-box">
             <input type="file" id="file-input" multiple>
             <label for="file-input">Drag & Drop 또는 파일 선택</label>
             <p id="file-count">선택된 파일 없음</p>
         </div>
-        <div id="image-preview" class="image-preview"></div>
         <button class="btn btn-process" onclick="processImages()">로고 추가하기</button>
+        <div class="footer">
+            <p>by_예찬</p>
+        </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script>
         const fileInput = document.getElementById('file-input');
         const fileCount = document.getElementById('file-count');
-        const imagePreview = document.getElementById('image-preview');
+        const uploadBox = document.getElementById('upload-box');
 
         let files = [];
 
         fileInput.addEventListener('change', (event) => {
             files = Array.from(event.target.files);
             fileCount.textContent = `${files.length}장의 사진이 추가됨.`;
-            displayImages();
         });
 
-        function displayImages() {
-            imagePreview.innerHTML = '';
-            files.forEach(file => {
-                const imgElement = document.createElement('img');
-                imgElement.src = URL.createObjectURL(file);
-                imagePreview.appendChild(imgElement);
-            });
-        }
+        uploadBox.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            uploadBox.style.borderColor = '#007BFF';
+        });
+
+        uploadBox.addEventListener('dragleave', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            uploadBox.style.borderColor = '#ccc';
+        });
+
+        uploadBox.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            uploadBox.style.borderColor = '#ccc';
+            files = Array.from(event.dataTransfer.files);
+            fileCount.textContent = `${files.length}장의 사진이 추가됨.`;
+        });
 
         async function processImages() {
             const zip = new JSZip();
@@ -141,7 +148,5 @@
             });
         }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </body>
 </html>
