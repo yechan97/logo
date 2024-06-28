@@ -1,158 +1,140 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>토리매트 로고 편집기</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Gowun Dodum', sans-serif;
-            background-color: #E0F7D4; 
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            height: 100vh;
+            background-color: #E0F7D4;
         }
         .container {
-            background-color: #fff;
+            text-align: center;
+            background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 800px;
-            width: 90%;
         }
-        h1 {
-            color: #81C784; 
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        .drop-zone {
+        .dropzone {
             border: 2px dashed #ccc;
             border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
             cursor: pointer;
+            margin-bottom: 20px;
         }
-        .drop-zone.hover {
-            background-color: #f1f1f1;
+        .dropzone.dragover {
+            border-color: #000;
         }
-        .drop-zone input {
-            display: none;
-        }
-        .drop-zone p {
-            margin: 0;
-            color: #888;
-            font-size: 16px;
-        }
-        .preview {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .preview img {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            margin: 5px;
-            border-radius: 10px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        #preview img {
+            max-width: 100%;
+            margin-bottom: 20px;
         }
         button {
-            background-color: #64B5F6; 
-            color: #fff;
-            border: none;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+            border: none;
             border-radius: 5px;
+            background-color: #64B5F6;
+            color: white;
         }
         button:hover {
-            background-color: #42A5F5; 
+            background-color: #42A5F5;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>토리매트 로고 편집기</h1>
-        <div class="drop-zone" id="drop-zone">
-            <p>Drag & Drop 또는 <label for="file-input" style="color: #64B5F6; cursor: pointer;">파일 선택</label></p>
-            <input type="file" id="file-input" multiple>
-        </div>
-        <div class="preview" id="preview"></div>
-        <button onclick="addLogo()">로고 추가하기</button>
+        <div class="dropzone" id="dropzone">Drag & Drop 또는 <input type="file" id="fileInput" multiple> 파일 선택</div>
+        <div id="preview"></div>
+        <button id="addLogoBtn">로고 추가하기</button>
     </div>
     <script>
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
+        const addLogoBtn = document.getElementById('addLogoBtn');
+
         let files = [];
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('hover');
+        dropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropzone.classList.add('dragover');
         });
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('hover');
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
         });
 
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('hover');
-            handleFiles(e.dataTransfer.files);
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropzone.classList.remove('dragover');
+            files = event.dataTransfer.files;
+            handleFiles(files);
         });
 
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
+        fileInput.addEventListener('change', (event) => {
+            files = event.target.files;
+            handleFiles(files);
         });
 
-        function handleFiles(selectedFiles) {
-            for (let file of selectedFiles) {
-                files.push(file);
+        function handleFiles(files) {
+            preview.innerHTML = '';
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
                 preview.appendChild(img);
             }
-            alert(files.length + '장의 사진이 추가됨.');
         }
 
-        function addLogo() {
+        addLogoBtn.addEventListener('click', () => {
             if (files.length === 0) {
-                alert('사진을 추가하세요.');
+                alert('사진을 선택해 주세요.');
                 return;
             }
 
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const logo = new Image();
-            logo.src = 'https://raw.githubusercontent.com/yechan97/torimat/main/logo.png'; // GitHub에 업로드된 로고 이미지 URL
+            const logoSrc = 'https://raw.githubusercontent.com/yechan97/logo/main/logo.png'; // GitHub에 올린 이미지 경로
+            const zip = new JSZip();
 
-            logo.onload = () => {
-                files.forEach((file, index) => {
-                    const img = new Image();
-                    img.src = URL.createObjectURL(file);
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const img = document.createElement('img');
+                const logo = new Image();
 
-                    img.onload = () => {
-                        canvas.width = 1080;
-                        canvas.height = 1080;
-                        ctx.drawImage(img, 0, 0, 1080, 1080);
-                        ctx.drawImage(logo, canvas.width - logo.width, canvas.height - logo.height);
-                        
+                img.src = URL.createObjectURL(file);
+                logo.src = logoSrc;
+
+                img.onload = () => {
+                    canvas.width = 1080;
+                    canvas.height = 1080;
+                    context.drawImage(img, 0, 0, 1080, 1080);
+                    logo.onload = () => {
+                        context.drawImage(logo, 1080 - logo.width, 1080 - logo.height);
                         canvas.toBlob((blob) => {
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = `image_with_logo_${index + 1}.png`;
-                            link.click();
-                            URL.revokeObjectURL(url);
+                            zip.file(`image_${i + 1}.png`, blob);
+                            if (i === files.length - 1) {
+                                zip.generateAsync({ type: 'blob' }).then((content) => {
+                                    saveAs(content, 'images_with_logo.zip');
+                                });
+                            }
                         });
-                    }
-                });
-            };
-        }
+                    };
+                };
+            }
+        });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </body>
 </html>
