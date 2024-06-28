@@ -61,6 +61,9 @@
         .btn-process {
             background-color: #28A745;
         }
+        .btn-reset {
+            background-color: #DC3545;
+        }
         .footer {
             text-align: center;
             margin-top: 20px;
@@ -78,6 +81,7 @@
             <p id="file-count">선택된 파일 없음</p>
         </div>
         <button class="btn btn-process" onclick="processImages()">로고 추가하기</button>
+        <button class="btn btn-reset" onclick="resetSelection()">초기화</button>
         <div class="footer">
             <p>by_예찬</p>
         </div>
@@ -94,6 +98,12 @@
             files = Array.from(event.target.files);
             fileCount.textContent = `${files.length}장의 사진이 추가됨.`;
         });
+
+        function resetSelection() {
+            fileInput.value = '';
+            files = [];
+            fileCount.textContent = '선택된 파일 없음';
+        }
 
         async function processImages() {
             const zip = new JSZip();
