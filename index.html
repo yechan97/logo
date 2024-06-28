@@ -138,7 +138,8 @@
             const logoImage = await fetch('https://raw.githubusercontent.com/yechan97/logo/main/logo.png')
                                     .then(response => response.blob());
 
-            files.forEach((file, index) => {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 const img = new Image();
@@ -147,21 +148,23 @@
                 img.src = URL.createObjectURL(file);
                 logo.src = URL.createObjectURL(logoImage);
 
-                img.onload = () => {
-                    canvas.width = 1080;
-                    canvas.height = 1080;
-                    ctx.drawImage(img, 0, 0, 1080, 1080);
-                    ctx.drawImage(logo, 0, 0, 1080, 1080);
+                await new Promise((resolve) => {
+                    img.onload = () => {
+                        canvas.width = 1080;
+                        canvas.height = 1080;
+                        ctx.drawImage(img, 0, 0, 1080, 1080);
+                        ctx.drawImage(logo, 0, 0, 1080, 1080);
 
-                    canvas.toBlob((blob) => {
-                        zip.file(`image_${index + 1}.png`, blob);
-                        if (index === files.length - 1) {
-                            zip.generateAsync({ type: 'blob' }).then((content) => {
-                                saveAs(content, 'images_with_logo.zip');
-                            });
-                        }
-                    });
-                };
+                        canvas.toBlob((blob) => {
+                            zip.file(`image_${i + 1}.png`, blob);
+                            resolve();
+                        });
+                    };
+                });
+            }
+
+            zip.generateAsync({ type: 'blob' }).then((content) => {
+                saveAs(content, 'images_with_logo.zip');
             });
         }
 
