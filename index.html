@@ -72,9 +72,9 @@
 <body>
     <div class="container">
         <h1>토리매트 로고 편집기</h1>
-        <div class="upload-box" id="upload-box">
+        <div class="upload-box">
             <input type="file" id="file-input" multiple>
-            <label for="file-input">Drag & Drop 또는 파일 선택</label>
+            <label for="file-input">파일 선택</label>
             <p id="file-count">선택된 파일 없음</p>
         </div>
         <button class="btn btn-process" onclick="processImages()">로고 추가하기</button>
@@ -87,32 +87,11 @@
     <script>
         const fileInput = document.getElementById('file-input');
         const fileCount = document.getElementById('file-count');
-        const uploadBox = document.getElementById('upload-box');
 
         let files = [];
 
         fileInput.addEventListener('change', (event) => {
             files = Array.from(event.target.files);
-            fileCount.textContent = `${files.length}장의 사진이 추가됨.`;
-        });
-
-        uploadBox.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            uploadBox.style.borderColor = '#007BFF';
-        });
-
-        uploadBox.addEventListener('dragleave', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            uploadBox.style.borderColor = '#ccc';
-        });
-
-        uploadBox.addEventListener('drop', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            uploadBox.style.borderColor = '#ccc';
-            files = Array.from(event.dataTransfer.files);
             fileCount.textContent = `${files.length}장의 사진이 추가됨.`;
         });
 
