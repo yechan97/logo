@@ -30,6 +30,7 @@
             color: #81C784;
             margin-bottom: 20px;
             font-size: 2em;
+            font-weight: bold;
         }
         .upload-box {
             border: 2px dashed #ccc;
@@ -57,6 +58,7 @@
             border-radius: 5px;
             color: #fff;
             margin: 5px;
+            font-weight: bold;
         }
         .btn-process {
             background-color: #28A745;
@@ -137,34 +139,36 @@
             const zip = new JSZip();
             const logoImage = await fetch('https://raw.githubusercontent.com/yechan97/logo/main/logo.png')
                                     .then(response => response.blob());
+            const logoURL = URL.createObjectURL(logoImage);
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
+                const img = await loadImage(URL.createObjectURL(file));
+                const logo = await loadImage(logoURL);
+
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                const img = new Image();
-                const logo = new Image();
 
-                img.src = URL.createObjectURL(file);
-                logo.src = URL.createObjectURL(logoImage);
+                canvas.width = 1080;
+                canvas.height = 1080;
 
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        canvas.width = 1080;
-                        canvas.height = 1080;
-                        ctx.drawImage(img, 0, 0, 1080, 1080);
-                        ctx.drawImage(logo, 0, 0, 1080, 1080);
+                ctx.drawImage(img, 0, 0, 1080, 1080);
+                ctx.drawImage(logo, 0, 0, 1080, 1080);
 
-                        canvas.toBlob((blob) => {
-                            zip.file(`image_${i + 1}.png`, blob);
-                            resolve();
-                        });
-                    };
-                });
+                const blob = await new Promise(resolve => canvas.toBlob(resolve));
+                zip.file(`image_${i + 1}.png`, blob);
             }
 
             zip.generateAsync({ type: 'blob' }).then((content) => {
                 saveAs(content, 'images_with_logo.zip');
+            });
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = src;
             });
         }
 
